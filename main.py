@@ -72,7 +72,11 @@ def main() -> None:
         input_text = st.chat_input("How may I help you?")
 
         if input_text:
-            chat_with_model(user_name=st.experimental_user.name, message_history=st.session_state.chat_history, new_text=input_text)
+            chat_with_model(
+                user_name=st.experimental_user.name,
+                message_history=st.session_state.chat_history,
+                new_text=input_text
+            )
 
         for message in st.session_state.chat_history:
             with chat_container.chat_message(message.role):
