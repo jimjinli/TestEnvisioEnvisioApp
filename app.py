@@ -6,15 +6,60 @@ import os
 
 load_dotenv()
 
+# Set page configuration and custom theme
+st.set_page_config(
+    page_title="Envisio Knowledge Base",
+    page_icon="🧠",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# Logo as base64 encoded SVG
+LOGO_BASE64 = """data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB3aWR0aD0iMTgwcHgiIGhlaWdodD0iNTNweCIgdmlld0JveD0iMCAwIDE4MCA1MyIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIj4KICAgIDwhLS0gR2VuZXJhdG9yOiBza2V0Y2h0b29sIDU4ICgxMDEwMTApIC0gaHR0cHM6Ly9za2V0Y2guY29tIC0tPgogICAgPHRpdGxlPkY0RkY5NjA0LTdDQkUtNDU0NS05RjZFLTNDQ0M2Mzk4Q0JBMDwvdGl0bGU+CiAgICA8ZGVzYz5DcmVhdGVkIHdpdGggc2tldGNodG9vbC48L2Rlc2M+CiAgICA8ZyBpZD0iRGVzaWduIiBzdHJva2U9Im5vbmUiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj4KICAgICAgICA8ZyBpZD0iYWJvdXQtVUkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0yMTEuMDAwMDAwLCAtNTg4Ni4wMDAwMDApIiBmaWxsLXJ1bGU9Im5vbnplcm8iPgogICAgICAgICAgICA8ZyBpZD0iRm9vdGVyLzRDb2xTdGFuZGFyZCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMC4wMDAwMDAsIDU0MzQuMDAwMDAwKSI+CiAgICAgICAgICAgICAgICA8ZyBpZD0iRWxlbWVudHMvSW1hZ2VzL0xvZ28iIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIxMi4wMDAwMDAsIDQ1Mi4wMDAwMDApIj4KICAgICAgICAgICAgICAgICAgICA8ZyBpZD0iZW52aXNpby1sb2dvLWhvcml6b250YWwtY29sb3IiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0xLjAwMDAwMCwgMC4wMDAwMDApIj4KICAgICAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTU3LjM4ODIzNTMsMjEuMzE4NzkxIEM1Ny4zNzAzOTc3LDIwLjc1MDU5NzggNTcuNTg5OTUyMiwyMC4yMDA1Nzk5IDU3Ljk5NDMyNzgsMTkuODAwNDM2NCBDNTguMzk4NzAzMywxOS40MDAyOTI5IDU4Ljk1MTQ4ODIsMTkuMTg2MDU0MiA1OS41MjAzMjA5LDE5LjIwOTAxODggTDY2LjA1NjE0OTcsMTkuMjA5MDE4OCBDNjcuMzk4OTMwNSwxOS4yMDkwMTg4IDY4LjE5MzA0ODEsMTkuOTg3NTY4IDY4LjE5MzA0ODEsMjEuMTYwMTk3NiBDNjguMTkzMDQ4MSwyMi4zMzI4MjcyIDY3LjM5ODkzMDUsMjMuMTExMzc2NCA2Ni4wNTYxNDk3LDIzLjExMTM3NjQgTDYxLjY1NzIxOTMsMjMuMTExMzc2NCBMNjEuNjU3MjE5MywyNi40NzU0Nzc4IEw2NS42OTAzNzQzLDI2LjQ3NTQ3NzggQzY3LjAzMzE1NTEsMjYuNDc1NDc3OCA2Ny44MTc2NDcxLDI3LjIzNDgwMzUgNjcuODE3NjQ3MSwyOC40MzE0NjI1IEM2Ny44MTc2NDcxLDI5LjYyODEyMTQgNjcuMDMzMTU1MSwzMC4zODI2NDEyIDY1LjY5MDM3NDMsMzAuMzgyNjQxMiBMNjEuNjU3MjE5MywzMC4zODI2NDEyIEw2MS42NTcyMTkzLDMzLjg1MjQ3MTUgTDY2LjIxNDk3MzMsMzMuODUyNDcxNSBDNjcuNTU3NzU0LDMzLjg1MjQ3MTUgNjguMzQ3MDU4OCwzNC41ODI5NjIxIDY4LjM0NzA1ODgsMzUuODAzNjUwMyBDNjguMzQ3MDU4OCwzNy4wMjQzMzg1IDY3LjU1Nzc1NCwzNy43NjkyNDY3IDY2LjIxNDk3MzMsMzcuNzY5MjQ2NyBMNTkuNTIwMzIwOSwzNy43NjkyNDY3IEM1OC45NTA2MjQ5LDM3Ljc5MjI4OTggNTguMzk3MDQ4OSwzNy41Nzc0MDcgNTcuOTkyNTE1MiwzNy4xNzYxOTUyIEM1Ny41ODc5ODE1LDM2Ljc3NDk4MzMgNTcuMzY5MDMwNCwzNi4yMjM2ODI1IDU3LjM4ODIzNTMsMzUuNjU0NjY4NyBMNTcuMzg4MjM1MywyMS4zMzMyMDg2IiBpZD0icGF0aDE0IiBmaWxsPSIjMjMxRjIwIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik03NC44NTQwMTA3LDIxLjI4OTk1NTggQzc0Ljg1NDAxMDcsMTkuODA0OTQ1NCA3NS43NDkxOTc5LDE5LjA1MDQyNTUgNzYuOTg2MDk2MywxOS4wNTA0MjU1IEM3OC4xMjE5MjUxLDE5LjA1MDQyNTUgNzguNTExNzY0NywxOS41MzEwMTE0IDc5LjkzNjM2MzYsMjEuMzE4NzkxIEw4Ny4wMjU2Njg0LDMwLjA3OTg3MjEgTDg3LjA3Mzc5NjgsMzAuMDc5ODcyMSBMODcuMDczNzk2OCwyMS4yODk5NTU4IEM4Ny4wNzM3OTY4LDE5LjgwNDk0NTQgODcuOTY4OTg0LDE5LjA1MDQyNTUgODkuMjEwNjk1MiwxOS4wNTA0MjU1IEM5MC40NTI0MDY0LDE5LjA1MDQyNTUgOTEuMzQyNzgwNywxOS44MDQ5NDU0IDkxLjM0Mjc4MDcsMjEuMjg5OTU1OCBMOTEuMzQyNzgwNywzNS42NjQyODA0IEM5MS4zNDI3ODA3LDM3LjE1NDA5NjcgOTAuNDUyNDA2NCwzNy45MDg2MTY2IDg5LjIxMDY5NTIsMzcuOTA4NjE2NiBDODguMDc5Njc5MSwzNy45MDg2MTY2IDg3LjY1NjE0OTcsMzcuNDI4MDMwNyA4Ni4yNjA0Mjc4LDM1LjY0MDI1MTEgTDc5LjE3MTEyMywyNi44NjQ3NTI0IEw3OS4xMTgxODE4LDI2Ljg2NDc1MjQgTDc5LjExODE4MTgsMzUuNjY0MjgwNCBDNzkuMTE4MTgxOCwzNy4xNTQwOTY3IDc4LjIyNzgwNzUsMzcuOTA4NjE2NiA3Ni45ODYwOTYzLDM3LjkwODYxNjYgQzc1Ljc0NDM4NSwzNy45MDg2MTY2IDc0Ljg1NDAxMDcsMzcuMTU0MDk2NyA3NC44NTQwMTA3LDM1LjY2NDI4MDQgTDc0Ljg1NDAxMDcsMjEuMjg5OTU1OCIgaWQ9InBhdGgxNiIgZmlsbD0iIzIzMUYyMCI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTA4LjgzNzQzMywyMC45NDg3Mzk4IEMxMDkuMjMyMDg2LDE5Ljk4NzU2OCAxMDkuNTk3ODYxLDE5LjAyNjI1NTIgMTExLjIxMDE2LDE5LjAyNjI1NTIgQzExMS43NjAxOTQsMTkuMDE5OTYyOCAxMTIuMjg5ODUzLDE5LjIzMzk4MzcgMTEyLjY4MDYxNywxOS42MjA1Njg4IEMxMTMuMDcxMzgyLDIwLjAwNzE1MzkgMTEzLjI5MDYzMSwyMC41MzQwMzA5IDExMy4yODkzMTEsMjEuMDgzMzAzOSBDMTEzLjIxMTczMSwyMS42MTQwNjI2IDExMy4wNjExMSwyMi4xMzE1NzgxIDExMi44NDE3MTEsMjIuNjIxMTc4OCBMMTA3LjUxODcxNywzNS42NDAyNTExIEMxMDcuMSwzNi42ODMxMjI1IDEwNi43Mjk0MTIsMzcuODg0NTg3MyAxMDUuMTQ1OTg5LDM3Ljg4NDU4NzMgQzEwMy41NjI1NjcsMzcuODg0NTg3MyAxMDMuMTk2NzkxLDM2LjY4MzEyMjUgMTAyLjc3ODA3NSwzNS42NDAyNTExIEw5Ny41NDE3MTEyLDIyLjY0NTIwODEgQzk3LjMyMjMxMjgsMjIuMTU1NjA3NCA5Ny4xNzE2OTE2LDIxLjYzODA5MTkgOTcuMDk0MTExNywyMS4xMDczMzMyIEM5Ny4wOTI3OTE3LDIwLjU1ODA2MDIgOTcuMzEyMDQwOSwyMC4wMzExODMyIDk3LjcwMjgwNTMsMTkuNjQ0NTk4MSBDOTguMDkzNTY5NiwxOS4yNTgwMTMgOTguNjIzMjI4LDE5LjA0Mzk5MjEgOTkuMTczMjYyLDE5LjA1MDQyNTUgQzEwMC43ODA3NDksMTkuMDUwNDI1NSAxMDEuMTUxMzM3LDIwLjAxMTU5NzMgMTAxLjU0NTk4OSwyMC45NzI3NjkxIEwxMDUuMTc5Njc5LDMwLjQ1NDcyOTEgTDEwOC44Mzc0MzMsMjAuOTQ4NzM5OCIgaWQ9InBhdGgxOCIgZmlsbD0iIzIzMUYyMCI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTIzLjMyNDA2NCwzNS42NjQyODA0IEMxMjMuMzI0MDY0LDM3LjE1NDA5NjcgMTIyLjQyODg3NywzNy45MDg2MTY2IDEyMS4xOTE5NzksMzcuOTA4NjE2NiBDMTE5Ljk1NTA4LDM3LjkwODYxNjYgMTE5LjA1OTg5MywzNy4xNTQwOTY3IDExOS4wNTk4OTMsMzUuNjY0MjgwNCBMMTE5LjA1OTg5MywyMS4yODk5NTU4IEMxMTkuMDU5ODkzLDE5LjgwNDk0NTQgMTE5Ljk1MDI2NywxOS4wNTA0MjU1IDEyMS4xOTE5NzksMTkuMDUwNDI1NSBDMTIyLjQzMzY5LDE5LjA1MDQyNTUgMTIzLjMyNDA2NCwxOS44MDQ5NDU0IDEyMy4zMjQwNjQsMjEuMjg5OTU1OCBMMTIzLjMyNDA2NCwzNS42NjQyODA0IiBpZD0icGF0aDIwIiBmaWxsPSIjMjMxRjIwIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xMzEuNzUxMzM3LDMyLjg3Njg4MjEgQzEzMi44MDUzNDgsMzIuODc2ODgyMSAxMzQuMTU3NzU0LDMzLjk0ODU4ODcgMTM2LjM2MjAzMiwzMy45NDg1ODg3IEMxMzguMDIyNDYsMzMuOTQ4NTg4NyAxMzguNjI4ODc3LDMzLjExNzE3NTEgMTM4LjYyODg3NywzMi4yMDQwNjE4IEMxMzguNjI4ODc3LDMwLjc5NTk0NTEgMTM2Ljk5MjUxMywzMC41MTIzOTk0IDEzNC41NzE2NTgsMjkuNzI5MDQ0NCBDMTMyLjM1Nzc1NCwyOS4wMjczODkgMTMwLjA2Njg0NSwyOC4wOTAyNDY1IDEzMC4wNjY4NDUsMjQuNzI2MTQ1MSBDMTMwLjA2Njg0NSwyMC42ODkyMjM0IDEzMy4yNTI5NDEsMTguNzkwOTA5MSAxMzYuODA0ODEzLDE4Ljc5MDkwOTEgQzE0MC4yMzE1NTEsMTguNzkwOTA5MSAxNDIuMTIyOTk1LDE5Ljk2MzUzODcgMTQyLjEyMjk5NSwyMS41NzgzMDc0IEMxNDIuMTU5NzE1LDIyLjA5Nzg0OTkgMTQxLjk3NTQ0NCwyMi42MDg3ODU4IDE0MS42MTU0MjksMjIuOTg1NjU5MSBDMTQxLjI1NTQxNCwyMy4zNjI1MzI0IDE0MC43NTMsMjMuNTcwNDM2MiAxNDAuMjMxNTUxLDIzLjU1ODMyMTMgQzEzOC44NTk4OTMsMjMuNTU4MzIxMyAxMzguNDEyMjk5LDIyLjg1MTg2IDEzNi41OTc4NjEsMjIuODUxODYgQzEzNS40Mzc5NjgsMjIuODUxODYgMTM0LjY0Mzg1LDIzLjQ1MjU5MjQgMTM0LjY0Mzg1LDI0LjM2NTcwNTYgQzEzNC42NDM4NSwyNS40MzI2MDY0IDEzNS42OTc4NjEsMjUuNTYyMzY0NiAxMzguNjQ4MTI4LDI2LjUyMzUzNjQgQzE0MC45NjMxMDIsMjcuMjc4MDU2MyAxNDMuMjEwNjk1LDI4LjQ0NTg4IDE0My4yMTA2OTUsMzEuOTY4NTc0OCBDMTQzLjIxMDY5NSwzNi4yNDU3ODk0IDE0MC4wMTk3ODYsMzguMTY4MTMzIDEzNi4wNDQzODUsMzguMTY4MTMzIEMxMzMuNTQxNzExLDM4LjE2ODEzMyAxMjkuNzQ0Mzg1LDM3LjIwNjk2MTIgMTI5Ljc0NDM4NSwzNS4xMjEyMTgzIEMxMjkuNzQ0Mzg1LDMzLjk3NzQyMzkgMTMwLjQ1NjY4NCwzMi44NzY4ODIxIDEzMS43NDY1MjQsMzIuODc2ODgyMSIgaWQ9InBhdGgyMiIgZmlsbD0iIzIzMUYyMCI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMTU0LjMzMzE1NSwzNS42NjQyODA0IEMxNTQuMzMzMTU1LDM3LjE1NDA5NjcgMTUzLjQ0Mjc4MSwzNy45MDg2MTY2IDE1Mi4yMDEwNywzNy45MDg2MTY2IEMxNTAuOTU5MzU4LDM3LjkwODYxNjYgMTUwLjA2NDE3MSwzNy4xNTQwOTY3IDE1MC4wNjQxNzEsMzUuNjY0MjgwNCBMMTUwLjA2NDE3MSwyMS4yODk5NTU4IEMxNTAuMDY0MTcxLDE5LjgwNDk0NTQgMTUwLjk1OTM1OCwxOS4wNTA0MjU1IDE1Mi4yMDEwNywxOS4wNTA0MjU1IEMxNTMuNDQyNzgxLDE5LjA1MDQyNTUgMTU0LjMzMzE1NSwxOS44MDQ5NDU0IDE1NC4zMzMxNTUsMjEuMjg5OTU1OCBMMTU0LjMzMzE1NSwzNS42NjQyODA0IiBpZD0icGF0aDI0IiBmaWxsPSIjMjMxRjIwIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0xNjUuNzYzNjM2LDI4LjQ3OTUyMSBDMTY1Ljc2MzYzNiwzMS40MjA3MDY4IDE2Ny4xMDE2MDQsMzQuMjQ2NTUyIDE3MC4zOTgzOTYsMzQuMjQ2NTUyIEMxNzMuNjk1MTg3LDM0LjI0NjU1MiAxNzUuMDMzMTU1LDMxLjQwMTQ4MzQgMTc1LjAzMzE1NSwyOC40Nzk1MjEgQzE3NS4wMzMxNTUsMjUuNTU3NTU4NyAxNzMuNjkwMzc0LDIyLjcxMjQ5MDEgMTcwLjM5ODM5NiwyMi43MTI0OTAxIEMxNjcuMTA2NDE3LDIyLjcxMjQ5MDEgMTY1Ljc2MzYzNiwyNS41NTI3NTI4IDE2NS43NjM2MzYsMjguNDc5NTIxIEwxNjUuNzYzNjM2LDI4LjQ3OTUyMSBaIE0xNzkuNjE5Nzg2LDI4LjQ3OTUyMSBDMTc5LjYxOTc4NiwzNC4zNjY2OTg0IDE3NS45NTcyMTksMzguMTY4MTMzIDE3MC4zOTgzOTYsMzguMTY4MTMzIEMxNjQuODM5NTcyLDM4LjE2ODEzMyAxNjEuMTc3MDA1LDM0LjM2NjY5ODQgMTYxLjE3NzAwNSwyOC40Nzk1MjEgQzE2MS4xNzcwMDUsMjIuNTkyMzQzNiAxNjQuODM5NTcyLDE4Ljc5MDkwOTEgMTcwLjM5ODM5NiwxOC43OTA5MDkxIEMxNzUuOTU3MjE5LDE4Ljc5MDkwOTEgMTc5LjYxOTc4NiwyMi41OTIzNDM2IDE3OS42MTk3ODYsMjguNDc5NTIxIEwxNzkuNjE5Nzg2LDI4LjQ3OTUyMSBaIiBpZD0icGF0aDI2IiBmaWxsPSIjMjMxRjIwIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik04LjkzNzQzMzE2LDQ2LjE2OTg4ODQgQzcuNjU0MTA1OTUsNDYuNTcyMzY5NCA2LjI1ODIyMzc0LDQ2LjA4ODIyNzkgNS41MDEwNjk1Miw0NC45NzgwMzUzIEMzLjkyNjU2NzMsNDIuNjg1OTMxNCAyLjY5NTkyMDYxLDQwLjE3NjM5NTQgMS44NDgxMjgzNCwzNy41Mjg5NTM3IEMtMy4wMTI4MzQyMiwyMi4zOTA0OTc2IDUuNDkxNDQzODUsNi4xNTE0OTk2NSAyMC44MTU1MDgsMS4zNDA4MzQ2OSBDMjMuMzIwNzE5MywwLjU1MzAyNzg4NiAyNS45MjAyODI5LDAuMTAzNjkzMzA5IDI4LjU0NDkxOTgsMC4wMDQ4MDU4NTkxIEMyOS42MjgwNTY3LC0wLjA0ODkwMzUyMTEgMzAuNjU2NTI3OSwwLjQ4MjgwMjcxIDMxLjIzNzgxNjksMS4zOTY5OTg1MyBDMzEuODE5MTA1OCwyLjMxMTE5NDM2IDMxLjg2MzUxMDEsMy40NjY4MDQ1NCAzMS4zNTQwODI5LDQuNDIyNzg5NzMgQzMwLjg0NDY1NTYsNS4zNzg3NzQ5MyAyOS44NjAwMDk3LDUuOTg3NjExMTIgMjguNzc1OTM1OCw2LjAxNjkzNTYgQzIwLjQzMTU4MzQsNi4yMzQ0MTg4OCAxMi44NzMwNjc4LDEwLjk4NzEyNTggOS4wNzA4MjY5MSwxOC40MDcyNzk0IEM1LjI2ODU4NjAxLDI1LjgyNzQzMyA1LjgzMDMyODU3LDM0LjcyOTA3NjggMTAuNTM1Mjk0MSw0MS42MTM5MzQgQzEwLjk4ODI2NjMsNDIuMjcyNzA1OSAxMS4xNTcyNTgxLDQzLjA4NTU1MzcgMTEuMDA0MzE4LDQzLjg2OTkzMDUgQzEwLjg1MTM3NzgsNDQuNjU0MzA3NCAxMC4zODkzMjQ3LDQ1LjM0NDQ2ODUgOS43MjE5MjUxMyw0NS43ODU0MTk3IEM5LjQ4MDE0MTU2LDQ1Ljk0OTEwNTYgOS4yMTU5MDUwNiw0Ni4wNzY5ODU2IDguOTM3NDMzMTYsNDYuMTY1MDgyNSIgaWQ9InBhdGgyOCIgZmlsbD0iIzdCNzk3OSI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMjkuNjgwNzQ4Nyw1Mi4wNTcwNjU4IEMyMS43ODQ4ODMyLDUwLjU3MzI3NDEgMTUuMzU4MDY1Myw0NC44NTExNTQxIDEyLjk4MDIxMzksMzcuMTg3NzM3NyBDMTAuMjQ3NTY5OSwyOC4zMzAyODkxIDEzLjUyOTg2NDUsMTguNzIyNjQzNCAyMS4xMTM5MDM3LDEzLjM3OTUxMTcgQzIyLjQ3NzA5NDgsMTIuNDE2ODEzNiAyNC4zNjE0MTgxLDEyLjcyMjU3MjMgMjUuMzQ5MTk3OSwxNC4wNjY3NDk2IEMyNS44MTg4Nzg3LDE0LjcxNDY2NzQgMjYuMDA5NDEwNSwxNS41MjMzMDYyIDI1Ljg3ODMxMTgsMTYuMzEyMzY5OSBDMjUuNzQ3MjEzMSwxNy4xMDE0MzM2IDI1LjMwNTM4NDMsMTcuODA1MzEzNCAyNC42NTEzMzY5LDE4LjI2NzA3MDQgQzE5LjE5MzA0MDcsMjIuMTI0OTk1MiAxNi44MjYzMzU0LDI5LjA0MjQxODIgMTguNzc5Njc5MSwzNS40Mjg3OTMzIEMyMC4xNTI4MzI1LDM5Ljc1NTkwNzEgMjMuMzI3MzgyLDQzLjI4MTkxNzQgMjcuNDkwNzEzOSw0NS4xMDQyNDQyIEMzMS42NTQwNDU5LDQ2LjkyNjU3MSAzNi40MDIwMTY0LDQ2Ljg2ODMxNzIgNDAuNTE5MjUxMyw0NC45NDQzOTQzIEM0Mi4wMzc1NTAzLDQ0LjIzNjMyNDcgNDMuODQzNzk0Niw0NC44Nzg5NDcgNDQuNTcxNjU3OCw0Ni4zODYxNTIxIEM0NC45MTQ3NTE2LDQ3LjEwODUxNjkgNDQuOTU1Mjg0OCw0Ny45Mzc2NTkgNDQuNjg0MjgxMSw0OC42ODk5NTc1IEM0NC40MTMyNzczLDQ5LjQ0MjI1NjEgNDMuODUzMTAwOCw1MC4wNTU2Mjg2IDQzLjEyNzgwNzUsNTAuMzk0MjM4NSBDMzguOTM0MzE1LDUyLjM1NDQ1MjYgMzQuMjI2NDE5Miw1Mi45MzY2MTg0IDI5LjY4MDc0ODcsNTIuMDU3MDY1OCIgaWQ9InBhdGgzMCIgZmlsbD0iIzEwODBBOCI+PC9wYXRoPgogICAgICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNMjkuODQ5MTk3OSwzMy45NTgyMDA0IEMyOS4wNTg5NTUsMzMuOTYyOTA2OCAyOC4yOTk3NDc5LDMzLjY1MTM1NjEgMjcuNzQxMTc2NSwzMy4wOTMxNDU4IEMyNy4xODA4Nzc0LDMyLjUyNDgzMjggMjYuODcwNzkwOSwzMS43NTY3OTQ0IDI2Ljg3OTY3OTEsMzAuOTU5MzQ0MyBDMjYuOTAwNTI5MywyOS4yNDQ2NTIyIDI4LjI1NDI1ODcsMjcuODQyMzUxNCAyOS45Njk1MTg3LDI3Ljc1ODY0MjIgQzM0LjEzMzEwNCwyNy41NTExNjY0IDM3LjQxOTI1MDQsMjQuMTQ5ODg1OSAzNy40Nzc1NDAxLDE5Ljk4NzU2OCBDMzcuNTA0ODUzMiwxOC4zNDE1NDIzIDM2Ljk2MDY3MDEsMTYuNzM2ODMwNiAzNS45Mzc0MzMyLDE1LjQ0NjAzMTIgQzM0Ljg5OTg5ODUsMTQuMDg1ODc1MyAzNS4xNDE1MzUsMTIuMTQ3MDQ0NCAzNi40ODEyODM0LDExLjA4MjMxMTEgQzM3LjA1Mjc1MzcsMTAuNjIzNDEwNiAzNy43NjQ1Mjg1LDEwLjM3NDA1NjggMzguNDk3ODYxLDEwLjM3NTc1MTYgQzM5LjQwMTI4NzYsMTAuMzY4NDY0MSA0MC4yNTc0NzQ2LDEwLjc3ODE5OTYgNDAuODE3NjQ3MSwxMS40ODYwMDMzIEM0Mi42OTM0ODExLDEzLjg0NTE0NzIgNDMuNjk2NDY5LDE2Ljc3ODQ1NDUgNDMuNjU3MjE5MywxOS43OTA1Mjc4IEM0My42MzY3MTk2LDIyLjY4ODg0MzkgNDIuNzI0Mzg1NiwyNS41MTA3OTkzIDQxLjA0Mzg1MDMsMjcuODczOTgyOCBDNDAuNjA3OTg1NiwyOC40ODcwMTY3IDQwLjEyNTI2MDgsMjkuMDY1NDQ3IDM5LjYsMjkuNjA0MDkyMSBDMzcuMDgwODY3NiwzMi4yNTI1Nzc3IDMzLjYyOTA4OTUsMzMuODE5MTM3MiAyOS45NzQzMzE2LDMzLjk3MjYxOCBMMjkuODU0MDEwNywzMy45NzI2MTgiIGlkPSJwYXRoMzIiIGZpbGw9IiM5OUQ2NDgiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8L2c+CiAgICAgICAgICAgICAgICA8L2c+CiAgICAgICAgICAgIDwvZz4KICAgICAgICA8L2c+CiAgICA8L2c+Cjwvc3ZnPg=="""
+
+# Custom CSS
+st.markdown("""
+    <style>
+    .main {
+        padding: 2rem;
+    }
+    .stApp {
+        background-color: #f5f5f5;
+    }
+    .css-1d391kg {
+        padding: 2rem 1rem;
+    }
+    .stButton>button {
+        background-color: #007bff;
+        color: white;
+        border-radius: 5px;
+        padding: 0.5rem 1rem;
+        border: none;
+    }
+    .stButton>button:hover {
+        background-color: #0056b3;
+    }
+    div.css-1v0mbdj.e115fcil1 {
+        background-color: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 class ChatMessage():
     def __init__(self, role: str, text: str):
         self.role = role
         self.text = text
 
 def login_screen():
-    st.header("This app is private.")
-    st.subheader("Please log in.")
-    st.button("Log in with Google", on_click=st.login)
+    col1, col2, col3 = st.columns([1,2,1])
+    with col2:
+        st.markdown(f'<img src="{LOGO_BASE64}" style="width: 200px;">', unsafe_allow_html=True)
+        st.header("Welcome to Envisio")
+        st.subheader("Please log in to continue")
+        st.button("🔐 Log in with Google", on_click=st.login)
 
 @st.cache_resource
 def get_boto3_agent_runtime_client():
@@ -32,9 +77,6 @@ def chat_with_model(user_name: str, message_history: List[ChatMessage], new_text
     model_arn = os.getenv('MODEL_ARN')
     knowledge_base_id = os.getenv('KNOWLEDGE_BASE_ID')
 
-    new_text_message = ChatMessage('user', text=new_text)
-    message_history.append(new_text_message)
-
     response = bedrock_agent_runtime_client.retrieve_and_generate(
         input={
             'text': f'I am {user_name}. {new_text}'
@@ -50,37 +92,57 @@ def chat_with_model(user_name: str, message_history: List[ChatMessage], new_text
 
     generated_text = response['output']['text']
     response_chat_message = ChatMessage('assistant', generated_text)
-
     message_history.append(response_chat_message)
 
 def main() -> None:
     """Main function to run the Streamlit app."""
-    st.set_page_config(page_title="Envisio Envisio Knowledge Base")
-    st.title("Envisio Envisio Knowledge Base")
 
     if not st.experimental_user.is_logged_in:
         login_screen()
     else:
-        st.header(f"Welcome, {st.experimental_user.name}!")
-        st.button("Log out", on_click=st.logout)
+        # Sidebar with navigation
+        with st.sidebar:
+            st.markdown(f'<img src="{LOGO_BASE64}" style="width: 100px;">', unsafe_allow_html=True)
+            st.title("Navigation")
+            st.button("🏠 Home")
+            st.button("⚙️ Settings")
+            st.divider()
+            st.button("🚪 Log out", on_click=st.logout, type="secondary")
+
+        # Main content
+        st.title("🧠 Envisio Knowledge Base")
+
+        # Get user name safely with proper type handling
+        user_name = str(st.experimental_user.name) if st.experimental_user.name else "Anonymous"
+        st.header(f"👋 Welcome, {user_name}!")
 
         if 'chat_history' not in st.session_state:
             st.session_state.chat_history = []
 
-        chat_container = st.container()
-
-        input_text = st.chat_input("How may I help you?")
-
-        if input_text:
-            chat_with_model(
-                user_name=st.experimental_user.name,
-                message_history=st.session_state.chat_history,
-                new_text=input_text
-            )
-
+        # Chat interface - Display existing messages
         for message in st.session_state.chat_history:
-            with chat_container.chat_message(message.role):
+            with st.chat_message(message.role, avatar="👤" if message.role == "user" else "🤖"):
                 st.markdown(message.text)
+
+        # Input area and processing
+        input_text = st.chat_input("💭 How may I help you today?")
+        if input_text:
+            # Immediately add and display user's message
+            new_message = ChatMessage('user', input_text)
+            st.session_state.chat_history.append(new_message)
+            with st.chat_message('user', avatar="👤"):
+                st.markdown(input_text)
+
+            # Show thinking state and process response
+            with st.chat_message('assistant', avatar="🤖"):
+                with st.spinner('Thinking...'):
+                    chat_with_model(
+                        user_name=user_name,
+                        message_history=st.session_state.chat_history,
+                        new_text=input_text
+                    )
+                    # Display the last message (the assistant's response)
+                    st.markdown(st.session_state.chat_history[-1].text)
 
 if __name__ == "__main__":
     main()
